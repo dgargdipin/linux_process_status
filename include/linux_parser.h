@@ -17,8 +17,14 @@ const std::string kMeminfoFilename{"/meminfo"};
 const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
-
+const int PROC_STAT_SIZE = 10;
+const int ACCUM_STAT_SIZE = 2;
+const int PROCESS_INFO_SIZE = 2;
 // System
+std::array<long, PROC_STAT_SIZE> parse_proc_stat_cpu();
+std::array<long, ACCUM_STAT_SIZE> Accumulated_Stats();
+std::array<int, PROCESS_INFO_SIZE> process_info();
+
 float MemoryUtilization();
 long UpTime();
 std::vector<int> Pids();

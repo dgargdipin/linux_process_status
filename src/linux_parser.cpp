@@ -3,10 +3,12 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
+
 /*
 kProcDirectory{"/proc/"};
 kCmdlineFilename{"/cmdline"};
@@ -92,39 +94,108 @@ float LinuxParser::MemoryUtilization() {
     if (key == "MemTotal:") {
       mem_total = value;
     } else if (key == "MemFree:") {
-      mem_free=value;
+      mem_free = value;
     }
   }
-  if(mem_total.empty()||mem_free.empty())return ERROR_INT;
-  float mem_total_f=stof(mem_total);
-  float mem_used=mem_total_f-stof(mem_free);
-  return mem_used/mem_total_f;
+  if (mem_total.empty() || mem_free.empty()) return ERROR_INT;
+  float mem_total_f = stof(mem_total);
+  float mem_used = mem_total_f - stof(mem_free);
+  return mem_used / mem_total_f;
 }
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() {
+  ifstream uptime_file{LinuxParser::kProcDirectory +
+                       LinuxParser::kUptimeFilename};
+  if (!uptime_file) return ERROR_INT;
+  long uptime;
+  uptime_file >> uptime;
+  // printf("%ld\n",uptime);
+  return uptime;
+}
 
+std::array<long, LinuxParser::PROC_STAT_SIZE> LinuxParser::parse_proc_stat_cpu() {
+  ifstream stat_stream{LinuxParser::kProcDirectory +
+                       LinuxParser::kStatFilename};
+  if (!stat_stream) return {};
+  long total_jiffies = 0;
+  string curr_line;
+  while (getline(stat_stream, curr_line)) {
+    istringstream line_stream{curr_line};
+    string cpu;
+    line_stream >> cpu;
+    if (cpu != "cpu") continue;
+    long user, nice, system, idle, iowait, irq, softirq, steal, guest,
+        guest_nice;
+    line_stream >> user >> nice >> system >> idle >> iowait >> irq >> softirq >>
+        steal >> guest >> guest_nice;
+    return {user, nice,    system, idle,  iowait,
+            irq,  softirq, steal,  guest, guest_nice};
+  }
+  return {};
+}
+
+std::array<long, LinuxParser::ACCUM_STAT_SIZE>
+LinuxParser::Accumulated_Stats() {
+  auto [user, nice, system, idle, iowait, irq, softIrq, steal, guest,
+        guest_nice] = parse_proc_stat_cpu();
+  user = user - guest;
+  nice = nice - guest_nice;
+  long idlealltime = idle + iowait;
+  long systemalltime = system + irq + softIrq;
+  long virtalltime = guest + guest_nice;
+  long totaltime =
+      user + nice + systemalltime + idlealltime + steal + virtalltime;
+  return {totaltime, idlealltime};
+}
 // TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+long LinuxParser::Jiffies() {
+  auto [totaltime, idle] = Accumulated_Stats();
+  return totaltime;
+}
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) {}
 
 // TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() { return Jiffies() - IdleJiffies(); }
 
 // TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() {
+  auto [totaltime, idle] = Accumulated_Stats();
+  return idle;
+}
 
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 // TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+std::array<int, LinuxParser::PROCESS_INFO_SIZE> LinuxParser::process_info(){
+  ifstream stat_stream{LinuxParser::kProcDirectory +
+                       LinuxParser::kStatFilename};
+  if (!stat_stream) return {};
+  string curr_line;
+  int total_procs,running_procs;
+  while (getline(stat_stream, curr_line)) {
+    istringstream line_stream{curr_line};
+    string processes;
+    line_stream >> processes;
+    if (processes != "processes" && processes != "procs_running") continue;
+    if(processes == "processes"){
+      line_stream>>total_procs;
+    }
+    else line_stream>>running_procs;
+  }
+  return { running_procs, total_procs };
+};
+int LinuxParser::TotalProcesses() { auto [running_procs,total_procs]=LinuxParser::process_info();return total_procs; }
 
 // TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+int LinuxParser::RunningProcesses() {
+  auto [running_procs, total_procs] = LinuxParser::process_info();
+  return running_procs;
+}
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
