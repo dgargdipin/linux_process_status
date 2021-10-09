@@ -4,11 +4,11 @@
 #include <unistd.h>
 
 #include <array>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include<iomanip>
 /*
 kProcDirectory{"/proc/"};
 kCmdlineFilename{"/cmdline"};
@@ -27,6 +27,8 @@ using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+using std::cout;
+using std::endl;
 
 const string ERROR_STRING = "Error";
 const int ERROR_INT = -1;
@@ -114,7 +116,8 @@ long LinuxParser::UpTime() {
   return uptime;
 }
 
-std::array<long, LinuxParser::PROC_STAT_SIZE> LinuxParser::parse_proc_stat_cpu() {
+std::array<long, LinuxParser::PROC_STAT_SIZE>
+LinuxParser::parse_proc_stat_cpu() {
   ifstream stat_stream{LinuxParser::kProcDirectory +
                        LinuxParser::kStatFilename};
   if (!stat_stream) return {};
@@ -157,27 +160,23 @@ long LinuxParser::Jiffies() {
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) {
-  ifstream pid_stream{LinuxParser::kProcDirectory+to_string(pid)+LinuxParser::kStatFilename};
-  if(!pid_stream)return ERROR_INT;
+  ifstream pid_stream{LinuxParser::kProcDirectory + to_string(pid) +
+                      LinuxParser::kStatFilename};
+  if (!pid_stream) return ERROR_INT;
   string pid_info;
+  getline(pid_stream, pid_info);
   istringstream pid_info_stream{pid_info};
-  getline(pid_stream,pid_info);
-  
-  string curr_word;
-  int curr_idx=LinuxParser::uTime_idx;
-  while(--curr_idx&&pid_info_stream>>curr_word){
-    std::cout << curr_word << std::endl;
-  };
-
-  long utime,stime,cutime,cstime;
-  pid_info_stream>>utime>>stime>>cutime>>cstime;
-  std::cout << utime << std::endl;
-  long active_process_jiffies=utime+stime;
-  bool COUNT_CHILD_PROC_TIME=false; 
-  if(COUNT_CHILD_PROC_TIME){
-    active_process_jiffies += cutime + cstime;
-  }
-  return active_process_jiffies;
+  // cout<<pid_info<<endl;
+  string comm;
+  char state;
+  int ppid,pgrp,session,tty_nr,tpgid;
+  unsigned int flags;
+  unsigned long minflt,cminflt,majflt,cmajflt,utime,stime;
+  long int cutime,cstime;
+  pid_info_stream>>pid>>comm>>state>>ppid>>pgrp>>session>>tty_nr>>tpgid>>flags>>minflt>>cminflt>>majflt>>cmajflt>>utime>>stime>>cutime>>cstime;
+  long jiffies = utime + stime;
+  // printf("%d:%ld \n",pid,jiffies);
+   return jiffies;
 }
 
 // TODO: Read and return the number of active jiffies for the system
@@ -193,25 +192,28 @@ long LinuxParser::IdleJiffies() {
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 // TODO: Read and return the total number of processes
-std::array<int, LinuxParser::PROCESS_INFO_SIZE> LinuxParser::process_info(){
+std::array<int, LinuxParser::PROCESS_INFO_SIZE> LinuxParser::process_info() {
   ifstream stat_stream{LinuxParser::kProcDirectory +
                        LinuxParser::kStatFilename};
   if (!stat_stream) return {};
   string curr_line;
-  int total_procs,running_procs;
+  int total_procs, running_procs;
   while (getline(stat_stream, curr_line)) {
     istringstream line_stream{curr_line};
     string processes;
     line_stream >> processes;
     if (processes != "processes" && processes != "procs_running") continue;
-    if(processes == "processes"){
-      line_stream>>total_procs;
-    }
-    else line_stream>>running_procs;
+    if (processes == "processes") {
+      line_stream >> total_procs;
+    } else
+      line_stream >> running_procs;
   }
-  return { running_procs, total_procs };
+  return {running_procs, total_procs};
 };
-int LinuxParser::TotalProcesses() { auto [running_procs,total_procs]=LinuxParser::process_info();return total_procs; }
+int LinuxParser::TotalProcesses() {
+  auto [running_procs, total_procs] = LinuxParser::process_info();
+  return total_procs;
+}
 
 // TODO: Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
@@ -221,37 +223,36 @@ int LinuxParser::RunningProcesses() {
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid [[maybe_unused]]) { 
-  ifstream command_stream{LinuxParser::kProcDirectory+to_string(pid)+LinuxParser::kCmdlineFilename};
-  if(!command_stream)return ERROR_STRING;
+string LinuxParser::Command(int pid [[maybe_unused]]) {
+  ifstream command_stream{LinuxParser::kProcDirectory + to_string(pid) +
+                          LinuxParser::kCmdlineFilename};
+  if (!command_stream) return ERROR_STRING;
   string command;
-  getline(command_stream,command);
+  getline(command_stream, command);
   return command;
-
- }
+}
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Ram(int pid [[maybe_unused]]) {
-  ifstream status_stream{LinuxParser::kProcDirectory+to_string(pid)+LinuxParser::kStatusFilename};
+  ifstream status_stream{LinuxParser::kProcDirectory + to_string(pid) +
+                         LinuxParser::kStatusFilename};
   string curr_line_string;
-  while(getline(status_stream,curr_line_string)){
+  while (getline(status_stream, curr_line_string)) {
     istringstream curr_line_stream{curr_line_string};
-    string key,size,unit;
-    curr_line_stream>>key;
+    string key, size, unit;
+    curr_line_stream >> key;
 
-    if(key=="VmSize:"){
+    if (key == "VmSize:") {
       curr_line_stream >> size >> unit;
-      double sizeInMb=std::stod(size)/1024;
+      double sizeInMb = std::stod(size) / 1024;
       std::ostringstream ram_precision_stream;
-      ram_precision_stream << std::fixed << std::setprecision(2)<<sizeInMb;
-      string ram=ram_precision_stream.str()+" "+"Mb";
+      ram_precision_stream << std::fixed << std::setprecision(2) << sizeInMb;
+      string ram = ram_precision_stream.str() + " " + "Mb";
       return ram;
-      
     }
-  } 
-
- }
+  }
+}
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
@@ -265,38 +266,48 @@ string LinuxParser::Uid(int pid [[maybe_unused]]) {
     curr_line_stream >> key;
     if (key == "Uid:") {
       string uid;
-      curr_line_stream>>uid;
+      curr_line_stream >> uid;
       return uid;
     }
   }
- }
+}
 
 // TODO: Read and return the user associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::User(int pid [[maybe_unused]]) {
   ifstream status_stream{LinuxParser::kPasswordPath};
   string curr_line_string;
-  string uid_to_catch=LinuxParser::Uid(pid);
+  string uid_to_catch = LinuxParser::Uid(pid);
   while (getline(status_stream, curr_line_string)) {
-    std::replace(curr_line_string.begin(),curr_line_string.end(),':',' ');
+    std::replace(curr_line_string.begin(), curr_line_string.end(), ':', ' ');
     istringstream curr_line_stream{curr_line_string};
-    string name,password,uid;
-    curr_line_stream >> name>>password>>uid;
-    if (uid==uid_to_catch) {
+    string name, password, uid;
+    curr_line_stream >> name >> password >> uid;
+    if (uid == uid_to_catch) {
       return name;
     }
   }
- }
+  return ERROR_STRING;
+}
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid [[maybe_unused]]) {
-  ifstream status_stream{LinuxParser::kProcDirectory + to_string(pid) +
-                         LinuxParser::kStatFilename};
-  int start_idx = LinuxParser::startTime_idx;
-  string curr;
-  while (--start_idx&&(status_stream>>curr));
-  long uptime;
-  status_stream>>uptime;
-  return uptime/sysconf(_SC_CLK_TCK);
+  ifstream pid_stream{LinuxParser::kProcDirectory + to_string(pid) +
+                      LinuxParser::kStatFilename};
+  if (!pid_stream) return ERROR_INT;
+  string pid_info;
+  getline(pid_stream, pid_info);
+  istringstream pid_info_stream{pid_info};
+  // cout<<pid_info<<endl;
+  string comm;
+  char state;
+  int ppid, pgrp, session, tty_nr, tpgid;
+  unsigned int flags;
+  unsigned long minflt, cminflt, majflt, cmajflt, utime, stime;
+  long int cutime, cstime,priority,nice,threads,itrealvalue,starttime;
+  pid_info_stream >> pid >> comm >> state >> ppid >> pgrp >> session >>
+      tty_nr >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt >>
+      utime >> stime >> cutime >> cstime>>priority>>nice>>threads>>itrealvalue>>starttime;
+  return starttime;
 }

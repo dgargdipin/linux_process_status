@@ -17,6 +17,8 @@ const std::string kMeminfoFilename{"/meminfo"};
 const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
+const std::string ERROR_STRING = "Error";
+const int ERROR_INT = -1;
 const int PROC_STAT_SIZE = 10;
 const int ACCUM_STAT_SIZE = 2;
 const int PROCESS_INFO_SIZE = 2;

@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <cassert>
 #include<iostream>
 #include "process.h"
 #include "processor.h"
@@ -18,14 +19,24 @@ Processor& System::Cpu() { return cpu_; }
 
 // TODO: Return a containers composed of the system's processes
 vector<Process>& System::Processes() {
+  processes_={};
   vector<int> pids=LinuxParser::Pids();
   for(auto &pid:pids){
+
     string user=LinuxParser::User(pid);
+    if(user==LinuxParser::ERROR_STRING)continue;
     string command=LinuxParser::Command(pid);
     Process newProcess=Process(pid,user,command);
     processes_.push_back(newProcess);
   }
-  return processes_;
+  sort(processes_.begin(),processes_.end());
+  // for(int i=0;i<processes_.size()-1;i++){
+  //   assert(processes_[i].process_util>processes_[i+1].process_util);
+  // }
+      // for(auto &process:processes_){
+      //   printf("%f ", process.CpuUtilization());
+      // }
+      return processes_;
 }
 
 // TODO: Return the system's kernel identifier (string)
