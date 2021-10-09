@@ -19,7 +19,12 @@ Processor& System::Cpu() { return cpu_; }
 // TODO: Return a containers composed of the system's processes
 vector<Process>& System::Processes() {
   vector<int> pids=LinuxParser::Pids();
-  //for(auto &pid:pids)std::cout<<pid<<" ";std::cout<<"\n";
+  for(auto &pid:pids){
+    string user=LinuxParser::User(pid);
+    string command=LinuxParser::Command(pid);
+    Process newProcess=Process(pid,user,command);
+    processes_.push_back(newProcess);
+  }
   return processes_;
 }
 
