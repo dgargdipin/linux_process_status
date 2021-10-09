@@ -30,8 +30,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-const string ERROR_STRING = "Error";
-const int ERROR_INT = -1;
+
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
   ifstream os_file{LinuxParser::kOSPath};
