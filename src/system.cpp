@@ -24,18 +24,14 @@ vector<Process>& System::Processes() {
   for(auto &pid:pids){
 
     string user=LinuxParser::User(pid);
-    if(user==LinuxParser::ERROR_STRING)continue;
+    
     string command=LinuxParser::Command(pid);
+    if(command.empty()||user.empty())continue;
     Process newProcess=Process(pid,user,command);
+    
     processes_.push_back(newProcess);
   }
   sort(processes_.begin(),processes_.end());
-  // for(int i=0;i<processes_.size()-1;i++){
-  //   assert(processes_[i].process_util>processes_[i+1].process_util);
-  // }
-      // for(auto &process:processes_){
-      //   printf("%f ", process.CpuUtilization());
-      // }
       return processes_;
 }
 

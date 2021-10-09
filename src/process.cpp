@@ -13,9 +13,9 @@ using std::vector;
 
 
 Process::Process(int pid,string user,string command){
-    Process::pid=pid;
-    Process::user=user;
-    Process::command=command;
+    this->pid=pid;
+    this->user=user;
+    this->command=command;
 }
 // TODO: Return this process's ID
 int Process::Pid() { return pid; }
@@ -45,7 +45,7 @@ long int Process::UpTime() const {
 }
 
 // TODO: Overload the "less than" comparison operator for Process objects
-// REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const {
+// REMOVE:  once you define the function
+bool Process::operator<(Process const& a) const {
   return CpuUtilization() > a.CpuUtilization();
 }

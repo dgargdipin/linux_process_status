@@ -120,7 +120,6 @@ LinuxParser::parse_proc_stat_cpu() {
   ifstream stat_stream{LinuxParser::kProcDirectory +
                        LinuxParser::kStatFilename};
   if (!stat_stream) return {};
-  long total_jiffies = 0;
   string curr_line;
   while (getline(stat_stream, curr_line)) {
     istringstream line_stream{curr_line};
@@ -139,6 +138,7 @@ LinuxParser::parse_proc_stat_cpu() {
 
 std::array<long, LinuxParser::ACCUM_STAT_SIZE>
 LinuxParser::Accumulated_Stats() {
+  
   auto [user, nice, system, idle, iowait, irq, softIrq, steal, guest,
         guest_nice] = parse_proc_stat_cpu();
   user = user - guest;
@@ -157,8 +157,8 @@ long LinuxParser::Jiffies() {
 }
 
 // TODO: Read and return the number of active jiffies for a PID
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) {
+// REMOVE:  once you define the function
+long LinuxParser::ActiveJiffies(int pid ) {
   ifstream pid_stream{LinuxParser::kProcDirectory + to_string(pid) +
                       LinuxParser::kStatFilename};
   if (!pid_stream) return ERROR_INT;
@@ -221,8 +221,8 @@ int LinuxParser::RunningProcesses() {
 }
 
 // TODO: Read and return the command associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid [[maybe_unused]]) {
+// REMOVE:  once you define the function
+string LinuxParser::Command(int pid ) {
   ifstream command_stream{LinuxParser::kProcDirectory + to_string(pid) +
                           LinuxParser::kCmdlineFilename};
   if (!command_stream) return ERROR_STRING;
@@ -232,8 +232,8 @@ string LinuxParser::Command(int pid [[maybe_unused]]) {
 }
 
 // TODO: Read and return the memory used by a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid [[maybe_unused]]) {
+// REMOVE:  once you define the function
+string LinuxParser::Ram(int pid ) {
   ifstream status_stream{LinuxParser::kProcDirectory + to_string(pid) +
                          LinuxParser::kStatusFilename};
   string curr_line_string;
@@ -251,11 +251,12 @@ string LinuxParser::Ram(int pid [[maybe_unused]]) {
       return ram;
     }
   }
+  return ERROR_STRING;
 }
 
 // TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid [[maybe_unused]]) {
+// REMOVE:  once you define the function
+string LinuxParser::Uid(int pid ) {
   ifstream status_stream{LinuxParser::kProcDirectory + to_string(pid) +
                          LinuxParser::kStatusFilename};
   string curr_line_string;
@@ -269,11 +270,12 @@ string LinuxParser::Uid(int pid [[maybe_unused]]) {
       return uid;
     }
   }
+  return ERROR_STRING;
 }
 
 // TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid [[maybe_unused]]) {
+// REMOVE:  once you define the function
+string LinuxParser::User(int pid ) {
   ifstream status_stream{LinuxParser::kPasswordPath};
   string curr_line_string;
   string uid_to_catch = LinuxParser::Uid(pid);
@@ -290,8 +292,8 @@ string LinuxParser::User(int pid [[maybe_unused]]) {
 }
 
 // TODO: Read and return the uptime of a process
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid [[maybe_unused]]) {
+// REMOVE:  once you define the function
+long LinuxParser::UpTime(int pid ) {
   ifstream pid_stream{LinuxParser::kProcDirectory + to_string(pid) +
                       LinuxParser::kStatFilename};
   if (!pid_stream) return ERROR_INT;
