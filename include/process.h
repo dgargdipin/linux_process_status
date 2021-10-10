@@ -15,6 +15,7 @@ class Process {
   float CpuUtilization() const;            // TODO: See src/process.cpp
   std::string Ram();                       // TODO: See src/process.cpp
   long StartTime() const;                       // TODO: See src/process.cpp
+  long UpTime() const;                       // TODO: See src/process.cpp
   bool operator<(Process const& a) const;  // TODO: See src/process.cpp
   float process_util=0;
 

@@ -42,6 +42,9 @@ string Process::User() { return user; }
 
 // TODO: Return the age of this process (in seconds)
 long int Process::StartTime() const {
+  return LinuxParser::StartTime(pid) / sysconf(_SC_CLK_TCK);
+}
+long int Process::UpTime() const {
   return LinuxParser::UpTime()-LinuxParser::StartTime(pid) / sysconf(_SC_CLK_TCK);
 }
 

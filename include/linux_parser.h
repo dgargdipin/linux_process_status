@@ -24,6 +24,7 @@ const int ACCUM_STAT_SIZE = 2;
 const int PROCESS_INFO_SIZE = 2;
 const int uTime_idx = 14;
 const int startTime_idx = 22;
+const int RAM_WIDTH = 7;
 // bool COUNT_CHILD_PROC_TIME=false;
 // System
 std::array<long, PROC_STAT_SIZE> parse_proc_stat_cpu();
