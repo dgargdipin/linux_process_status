@@ -3,9 +3,9 @@
 
 int main() {
   System system;
-  printf("\n\n\n\n\n\n\n\n\n");
-  printf("\n\n\n\n\n\n\n\n\n");
-  printf("\n\n\n\n\n\n\n\n\n");
-  printf("Created system\n");
+  // printf("\n\n\n\n\n\n\n\n\n");
+  // printf("\n\n\n\n\n\n\n\n\n");
+  // printf("\n\n\n\n\n\n\n\n\n");
+  // printf("Created system\n");
   NCursesDisplay::Display(system);
 }

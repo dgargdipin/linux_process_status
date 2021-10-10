@@ -26,10 +26,13 @@ vector<Process>& System::Processes() {
     string user=LinuxParser::User(pid);
     
     string command=LinuxParser::Command(pid);
-    if(command.empty()||user.empty())continue;
+    if (command == LinuxParser::ERROR_STRING || user==LinuxParser::ERROR_STRING) continue;
     Process newProcess=Process(pid,user,command);
-    
+
     processes_.push_back(newProcess);
+  }
+  for(auto &process:processes_){
+    process.process_util=process.CpuUtilization();
   }
   sort(processes_.begin(),processes_.end());
       return processes_;

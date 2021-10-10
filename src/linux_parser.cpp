@@ -141,6 +141,8 @@ LinuxParser::Accumulated_Stats() {
   
   auto [user, nice, system, idle, iowait, irq, softIrq, steal, guest,
         guest_nice] = parse_proc_stat_cpu();
+  
+  
   user = user - guest;
   nice = nice - guest_nice;
   long idlealltime = idle + iowait;
@@ -246,8 +248,9 @@ string LinuxParser::Ram(int pid ) {
       curr_line_stream >> size >> unit;
       double sizeInMb = std::stod(size) / 1024;
       std::ostringstream ram_precision_stream;
-      ram_precision_stream << std::fixed << std::setprecision(2) << sizeInMb;
-      string ram = ram_precision_stream.str() + " " + "Mb";
+      ram_precision_stream << std::fixed << std::setprecision(1) << sizeInMb;
+      string ram = ram_precision_stream.str()+" ";
+      // cout<<ram<<endl;
       return ram;
     }
   }

@@ -23,6 +23,7 @@ int Process::Pid() { return pid; }
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() const {
   long total_time=LinuxParser::ActiveJiffies(pid);
+  if(total_time==LinuxParser::ERROR_INT)return 0;
   long seconds=LinuxParser::UpTime()-Process::UpTime();
   float ans=((float)total_time/sysconf(_SC_CLK_TCK))/(float)seconds;
   return ans;
@@ -47,5 +48,5 @@ long int Process::UpTime() const {
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE:  once you define the function
 bool Process::operator<(Process const& a) const {
-  return CpuUtilization() > a.CpuUtilization();
+  return process_util>a.process_util;
 }
