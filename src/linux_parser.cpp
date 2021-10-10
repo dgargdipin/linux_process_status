@@ -112,7 +112,7 @@ long LinuxParser::UpTime() {
   long uptime;
   uptime_file >> uptime;
   // printf("%ld\n",uptime);
-  return uptime;
+  return uptime;//inseconds
 }
 
 std::array<long, LinuxParser::PROC_STAT_SIZE>
@@ -296,7 +296,7 @@ string LinuxParser::User(int pid ) {
 
 // TODO: Read and return the uptime of a process
 // REMOVE:  once you define the function
-long LinuxParser::UpTime(int pid ) {
+long LinuxParser::StartTime(int pid ) {
   ifstream pid_stream{LinuxParser::kProcDirectory + to_string(pid) +
                       LinuxParser::kStatFilename};
   if (!pid_stream) return ERROR_INT;
@@ -313,5 +313,5 @@ long LinuxParser::UpTime(int pid ) {
   pid_info_stream >> pid >> comm >> state >> ppid >> pgrp >> session >>
       tty_nr >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt >>
       utime >> stime >> cutime >> cstime>>priority>>nice>>threads>>itrealvalue>>starttime;
-  return starttime;
+  return starttime;//measured in clock ticks
 }

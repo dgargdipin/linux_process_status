@@ -24,7 +24,7 @@ int Process::Pid() { return pid; }
 float Process::CpuUtilization() const {
   long total_time=LinuxParser::ActiveJiffies(pid);
   if(total_time==LinuxParser::ERROR_INT)return 0;
-  long seconds=LinuxParser::UpTime()-Process::UpTime();
+  long seconds=LinuxParser::UpTime()-Process::StartTime();
   float ans=((float)total_time/sysconf(_SC_CLK_TCK))/(float)seconds;
   return ans;
 
@@ -41,8 +41,8 @@ string Process::Ram() { return LinuxParser::Ram(pid); }
 string Process::User() { return user; }
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() const {
-  return LinuxParser::UpTime(pid) / sysconf(_SC_CLK_TCK);
+long int Process::StartTime() const {
+  return LinuxParser::UpTime()-LinuxParser::StartTime(pid) / sysconf(_SC_CLK_TCK);
 }
 
 // TODO: Overload the "less than" comparison operator for Process objects
