@@ -25,6 +25,8 @@ const int PROCESS_INFO_SIZE = 2;
 const int uTime_idx = 14;
 const int startTime_idx = 22;
 const int RAM_WIDTH = 7;
+const int COMMAND_WIDTH = 150;
+const bool INCLUDE_CU_CS_TIME = false;
 // bool COUNT_CHILD_PROC_TIME=false;
 // System
 std::array<long, PROC_STAT_SIZE> parse_proc_stat_cpu();
@@ -59,6 +61,7 @@ long ActiveJiffies(int pid);
 long IdleJiffies();
 
 // Processes
+void padWithChar(std::string& command, char toFillWith, int n);
 std::string Command(int pid);
 std::string Ram(int pid);
 std::string Uid(int pid);

@@ -1,7 +1,8 @@
 #include "format.h"
 
+#include <sstream>
 #include <string>
-
+#include<iomanip>
 using std::string;
 
 // TODO: Complete this helper function
@@ -12,5 +13,11 @@ string Format::ElapsedTime(long seconds) {
   int minutes = seconds / 60;
   int hours = minutes / 60;
   minutes=minutes%60;
-  return std::to_string(hours) + ":" + std::to_string(minutes)+ ":"+std::to_string(seconds%60)+" ";
+  std::ostringstream formatter;
+
+  formatter << std::setfill('0') << std::setw(2) << std::to_string(hours) << ":"
+            << std::setfill('0') << std::setw(2) << std::to_string(minutes)
+            << ":" << std::setfill('0')
+            << std::setw(2)<< std::to_string(seconds % 60);
+  return formatter.str();
 }

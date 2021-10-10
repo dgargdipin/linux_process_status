@@ -16,6 +16,7 @@ Process::Process(int pid,string user,string command){
     this->pid=pid;
     this->user=user;
     this->command=command;
+    // std::cout<<command.c_str()<<std::endl;
 }
 // TODO: Return this process's ID
 int Process::Pid() { return pid; }
