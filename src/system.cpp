@@ -1,14 +1,17 @@
+#include "system.h"
+
+#include <linux_parser.h>
 #include <unistd.h>
+
+#include <cassert>
 #include <cstddef>
+#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
-#include <cassert>
-#include<iostream>
+
 #include "process.h"
 #include "processor.h"
-#include "system.h"
-#include<linux_parser.h>
 using std::set;
 using std::size_t;
 using std::string;
@@ -19,23 +22,24 @@ Processor& System::Cpu() { return cpu_; }
 
 // TODO: Return a containers composed of the system's processes
 vector<Process>& System::Processes() {
-  processes_={};
-  vector<int> pids=LinuxParser::Pids();
-  for(auto &pid:pids){
+  processes_ = {};
+  vector<int> pids = LinuxParser::Pids();
+  for (auto& pid : pids) {
+    string user = LinuxParser::User(pid);
 
-    string user=LinuxParser::User(pid);
-    
-    string command=LinuxParser::Command(pid);
-    
-    if (command == LinuxParser::ERROR_STRING || user==LinuxParser::ERROR_STRING) continue;
+    string command = LinuxParser::Command(pid);
+
+    if (command == LinuxParser::ERROR_STRING ||
+        user == LinuxParser::ERROR_STRING)
+      continue;
 
     processes_.push_back(Process(pid, user, command));
   }
-  for(auto &process:processes_){
-    process.process_util=process.CpuUtilization();
+  for (auto& process : processes_) {
+    process.process_util = process.CpuUtilization();
   }
-  sort(processes_.begin(),processes_.end());
-      return processes_;
+  sort(processes_.begin(), processes_.end());
+  return processes_;
 }
 
 // TODO: Return the system's kernel identifier (string)
@@ -54,6 +58,4 @@ int System::RunningProcesses() { return LinuxParser::RunningProcesses(); }
 int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
 
 // TODO: Return the number of seconds since the system started running
-long int System::UpTime() {
-  return LinuxParser::UpTime();
-}
+long int System::UpTime() { return LinuxParser::UpTime(); }

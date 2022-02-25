@@ -73,7 +73,9 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   wattroff(window, COLOR_PAIR(2));
   int const num_processes = int(processes.size()) > n ? n : processes.size();
   for (int i = 0; i < num_processes; ++i) {
-    mvwprintw(window, ++row, pid_column, to_string(processes[i].Pid()).c_str());
+    wmove(window, ++row, 0);
+    wclrtoeol(window);
+    mvwprintw(window, row, pid_column, to_string(processes[i].Pid()).c_str());
     mvwprintw(window, row, user_column, processes[i].User().c_str());
     float cpu = processes[i].CpuUtilization() * 100;
     mvwprintw(window, row, cpu_column, to_string(cpu).substr(0, 4).c_str());
@@ -81,9 +83,8 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
     mvwprintw(window, row, time_column,
               Format::ElapsedTime(processes[i].UpTime()).c_str());
 
-     mvwprintw(
-        window, row, command_column,
-        processes[i].Command().substr(0, window->_maxx - 46).c_str());
+    mvwprintw(window, row, command_column,
+              processes[i].Command().substr(0, window->_maxx - 46).c_str());
   }
 }
 

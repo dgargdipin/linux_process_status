@@ -175,7 +175,7 @@ long LinuxParser::ActiveJiffies(int pid) {
       tty_nr >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt >>
       utime >> stime >> cutime >> cstime;
   long jiffies = utime + stime;
-  if(LinuxParser::INCLUDE_CU_CS_TIME)jiffies+=cutime+cstime;
+  if (LinuxParser::INCLUDE_CU_CS_TIME) jiffies += cutime + cstime;
   // printf("%d:%ld \n",pid,jiffies);
   return jiffies;
 }
@@ -225,10 +225,10 @@ int LinuxParser::RunningProcesses() {
 // TODO: Read and return the command associated with a process
 // REMOVE:  once you define the function
 
-//tried to fix ncurses command bug after using setw and setfill, but still nothing happened
-//printf("%s",string.to_str()) does not display the formatting
+// tried to fix ncurses command bug after using setw and setfill, but still
+// nothing happened printf("%s",string.to_str()) does not display the formatting
 void LinuxParser::padWithChar(string &command, char toFillWith, int n) {
-  while((int)command.size()<n)command+=toFillWith;
+  while ((int)command.size() < n) command += toFillWith;
   return;
 }
 string LinuxParser::Command(int pid) {
